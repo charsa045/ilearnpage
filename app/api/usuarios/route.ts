@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getUsuarioByUid,
   getOrCreateUsuario,
+  createUsuario,
 } from "@/lib/usuarios/usuario.respository";
 
 import { RolUsuario } from "@/lib/usuarios/usuario.type";
@@ -15,12 +16,8 @@ export async function GET(req: NextRequest) {
 
     if (!uid) {
       return NextResponse.json(
-        {
-          error: "uid es requerido",
-        },
-        {
-          status: 400,
-        }
+        { error: "uid es requerido" },
+        { status: 400 }
       );
     }
 
@@ -28,12 +25,8 @@ export async function GET(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        {
-          error: "usuario no encontrado",
-        },
-        {
-          status: 404,
-        }
+        { error: "usuario no encontrado" },
+        { status: 404 }
       );
     }
 
@@ -42,12 +35,8 @@ export async function GET(req: NextRequest) {
     console.error("GET /usuarios error:", error);
 
     return NextResponse.json(
-      {
-        error: "error interno",
-      },
-      {
-        status: 500,
-      }
+      { error: "error interno" },
+      { status: 500 }
     );
   }
 }
@@ -61,25 +50,44 @@ export async function POST(req: NextRequest) {
       rol?: RolUsuario;
     };
 
-    const { uid, nombre, email, rol } = body;
+    const {
+      uid,
+      nombre,
+      email,
+      rol,
+    } = body;
 
     if (!uid || !nombre || !email) {
       return NextResponse.json(
-        {
-          error: "faltan datos",
-        },
-        {
-          status: 400,
-        }
+        { error: "faltan datos" },
+        { status: 400 }
       );
     }
 
-    const usuario = await getOrCreateUsuario({
+    const usuarioExistente = await getUsuarioByUid(uid);
+
+    if (usuarioExistente) {
+      return NextResponse.json(usuarioExistente, {
+        status: 200,
+      });
+    }
+
+    if (rol && rol !== "admin" && rol !== "docente") {
+      return NextResponse.json(
+        { error: "rol inválido" },
+        { status: 400 }
+      );
+    }
+
+    await createUsuario({
       uid,
       nombre,
       email,
       rol: rol || "docente",
+      activo: true,
     });
+
+    const usuario = await getUsuarioByUid(uid);
 
     return NextResponse.json(usuario, {
       status: 201,
@@ -88,12 +96,8 @@ export async function POST(req: NextRequest) {
     console.error("POST /usuarios error:", error);
 
     return NextResponse.json(
-      {
-        error: "error interno",
-      },
-      {
-        status: 500,
-      }
+      { error: "error interno" },
+      { status: 500 }
     );
   }
 }
