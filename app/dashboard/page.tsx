@@ -39,10 +39,9 @@ if (isDocente && user?.uid) {
 
   return (
     <>
-      <AuthHeader user={user} />
+      <AuthHeader />
 
       <main className="relative min-h-screen px-4 py-10">
-        {/* Fondo */}
         <div className="absolute inset-0">
           <img
             src="https://toluca.tecnm.mx/assets/images/img-landing.jpg"
