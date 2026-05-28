@@ -51,7 +51,7 @@ export default function Login() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => null);
-      console.log("🔥 ERROR BACKEND:", data);
+      console.log("ERROR BACKEND:", data);
 
       throw new Error(data?.error || "No se pudo crear la sesión");
     }
@@ -102,7 +102,7 @@ export default function Login() {
 
   return (
       <>
-      <PublicHeader isLogin />
+      <PublicHeader/>
 
       <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
 
