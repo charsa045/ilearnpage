@@ -5,6 +5,9 @@ export interface Usuario {
   nombre: string;
   email: string;
   rol: RolUsuario;
+  imageUrl?: string;
+  imagePublicId?: string;
   activo: boolean;
   createdAt: Date;
+  updatedAt?: Date;
 }

@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import {
   getUsuarioByUid,
   getOrCreateUsuario,
 } from "@/lib/usuarios/usuario.respository";
 
+import { RolUsuario } from "@/lib/usuarios/usuario.type";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+
     const uid = searchParams.get("uid");
 
     if (!uid) {
       return NextResponse.json(
-        { error: "uid es requerido" },
-        { status: 400 }
+        {
+          error: "uid es requerido",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
@@ -20,8 +28,12 @@ export async function GET(req: NextRequest) {
 
     if (!usuario) {
       return NextResponse.json(
-        { error: "usuario no encontrado" },
-        { status: 404 }
+        {
+          error: "usuario no encontrado",
+        },
+        {
+          status: 404,
+        }
       );
     }
 
@@ -30,57 +42,58 @@ export async function GET(req: NextRequest) {
     console.error("GET /usuarios error:", error);
 
     return NextResponse.json(
-      { error: "error interno" },
-      { status: 500 }
+      {
+        error: "error interno",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
 
-
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as {
+      uid?: string;
+      nombre?: string;
+      email?: string;
+      rol?: RolUsuario;
+    };
 
     const { uid, nombre, email, rol } = body;
 
     if (!uid || !nombre || !email) {
       return NextResponse.json(
-        { error: "faltan datos" },
-        { status: 400 }
+        {
+          error: "faltan datos",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    export async function getOrCreateUsuario({
-  uid,
-  nombre,
-  email,
-  rol = "docente",
-}: {
-  uid: string;
-  nombre: string;
-  email: string;
-  rol?: RolUsuario;
-}): Promise<Usuario> {
-  const existente = await getUsuarioByUid(uid);
+    const usuario = await getOrCreateUsuario({
+      uid,
+      nombre,
+      email,
+      rol: rol || "docente",
+    });
 
-  if (existente) {
-    return existente;
+    return NextResponse.json(usuario, {
+      status: 201,
+    });
+  } catch (error) {
+    console.error("POST /usuarios error:", error);
+
+    return NextResponse.json(
+      {
+        error: "error interno",
+      },
+      {
+        status: 500,
+      }
+    );
   }
-
-  const nuevoUsuario: Omit<Usuario, "createdAt"> = {
-    uid,
-    nombre,
-    email,
-    rol,
-    activo: true,
-    imageUrl: "",
-    imagePublicId: "",
-  };
-
-  await createUsuario(nuevoUsuario);
-
-  return {
-    ...nuevoUsuario,
-    createdAt: new Date(),
-  };
 }
