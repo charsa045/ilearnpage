@@ -28,7 +28,7 @@ export default async function DashboardPage() {
 
   const docentes = isAdmin ? await getDocentes() : [];
   const alumnos = isAdmin ? await getAlumnos() : [];
-  let clasesDocente = [];
+  let clasesDocente: any[] = [];
 
 if (isDocente && user?.uid) {
   clasesDocente = await getClasesByDocente(user.uid);
