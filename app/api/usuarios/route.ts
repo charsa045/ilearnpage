@@ -50,20 +50,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const usuario = await getOrCreateUsuario({
-      uid,
-      nombre,
-      email,
-      rol: rol || "docente",
-    });
+    export async function getOrCreateUsuario({
+  uid,
+  nombre,
+  email,
+  rol = "docente",
+}: {
+  uid: string;
+  nombre: string;
+  email: string;
+  rol?: RolUsuario;
+}): Promise<Usuario> {
+  const existente = await getUsuarioByUid(uid);
 
-    return NextResponse.json(usuario);
-  } catch (error) {
-    console.error("POST /usuarios error:", error);
-
-    return NextResponse.json(
-      { error: "error interno" },
-      { status: 500 }
-    );
+  if (existente) {
+    return existente;
   }
+
+  const nuevoUsuario: Omit<Usuario, "createdAt"> = {
+    uid,
+    nombre,
+    email,
+    rol,
+    activo: true,
+    imageUrl: "",
+    imagePublicId: "",
+  };
+
+  await createUsuario(nuevoUsuario);
+
+  return {
+    ...nuevoUsuario,
+    createdAt: new Date(),
+  };
 }
